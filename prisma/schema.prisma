@@ -16,7 +16,7 @@ model Todo {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  name     String
+  id       Int    @id @default(autoincrement())
+  username String @unique
   password String
 }

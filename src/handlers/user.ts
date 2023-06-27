@@ -1,35 +1,76 @@
 import { Request, Response } from "express";
+import { IRepositoryUser } from "../repositories/user";
 
-interface IUser {
-  username: string;
-  password: string;
+// TODO: move HandlerFund
+type HandlerFunc = (req: Request, res: Response) => Promise<Response>;
+
+export interface IHandlerUser {
+  register: HandlerFunc;
+  login: HandlerFunc;
 }
 
-const userDb = new Map<string, IUser>();
-
-export async function register(req: Request, res: Response): Promise<Response> {
-  const { username, password } = req.body;
-  if (userDb.has(username)) {
-    return res.status(400).json({ error: `duplicate username: ${username}` });
-  }
-
-  userDb.set(username, { username, password });
-  return res.status(201).json({ status: `user ${username} registered` });
+export function newHandlerUser(repo: IRepositoryUser): IHandlerUser {
+  return new HandlerUser(repo);
 }
 
-export async function login(req: Request, res: Response): Promise<Response> {
-  const { username, password } = req.body;
+class HandlerUser implements IHandlerUser {
+  private repo: IRepositoryUser;
 
-  const user = userDb.get(username);
-  if (!user) {
-    return res.status(404).json({ error: `username ${username} not found` });
+  constructor(repo: IRepositoryUser) {
+    this.repo = repo;
   }
 
-  if (!user.password === password) {
-    return res
-      .status(401)
-      .json({ error: `invalid password for user ${username}` });
+  async register(req: Request, res: Response): Promise<Response> {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ error: "missing username or password" })
+        .end();
+    }
+
+    return this.repo
+      .createUser({ username, password })
+      .then((user) =>
+        res
+          .status(201)
+          .json({ ...user, password: undefined })
+          .end(),
+      )
+      .catch((err) => {
+        const errMsg = `failed to create user ${username}`;
+        console.error(`${errMsg}: ${err}`);
+        return res.status(500).json({ error: errMsg }).end();
+      });
   }
 
-  return res.status(200).json({ status: `user ${username} logged in` });
+  async login(req: Request, res: Response): Promise<Response> {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ error: "missing username or password" })
+        .end();
+    }
+
+    return this.repo
+      .getUser(username)
+      .then((user) => {
+        if (!user.password !== password) {
+          return res
+            .status(401)
+            .json({ error: "invalid username or password" })
+            .end();
+        }
+
+        return res
+          .status(200)
+          .json({ status: "logged in", user: { ...user, password: undefined } })
+          .end();
+      })
+      .catch((err) => {
+        console.error(`failed to get user: ${err}`);
+        return res.status(500).end();
+      });
+  }
 }

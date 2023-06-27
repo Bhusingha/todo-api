@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IRepositoryTodo } from "../repositories/todo";
 
+// TODO: move HandlerFund
 type HandlerFunc = (req: Request, res: Response) => Promise<Response>;
 
 export interface IHandlerTodo {

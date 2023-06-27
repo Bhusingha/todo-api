@@ -2,12 +2,18 @@ import { PrismaClient } from "@prisma/client";
 import express from "express";
 
 import { newRepositoryTodo } from "./repositories/todo";
+import { newRepositoryUser } from "./repositories/user";
 
 import { newHandlerTodo } from "./handlers/todo";
-import { login, register } from "./handlers/user";
+import { newHandlerUser } from "./handlers/user";
 
 async function main() {
   const db = new PrismaClient();
+
+  const repoUser = newRepositoryUser(db);
+  const handlerUser = newHandlerUser(repoUser);
+  const repoTodo = newRepositoryTodo(db);
+  const handlerTodo = newHandlerTodo(repoTodo);
 
   const port = process.env.PORT || 8000;
   const server = express();
@@ -18,17 +24,14 @@ async function main() {
   server.use("/user", userRouter);
   server.use("/todo", todoRouter);
 
-  const repoTodo = newRepositoryTodo(db);
-  const handlerTodo = newHandlerTodo(repoTodo);
-
   // Check server status
   server.get("/", (_, res) => {
     return res.status(200).json({ status: "ok" }).end();
   });
 
   // User API
-  userRouter.post("/register", register);
-  userRouter.post("/login", login);
+  userRouter.post("/register", handlerUser.register.bind(handlerUser));
+  userRouter.post("/login", handlerUser.login.bind(handlerUser));
 
   // To-do API
   todoRouter.post("/", handlerTodo.createTodo.bind(handlerTodo));
