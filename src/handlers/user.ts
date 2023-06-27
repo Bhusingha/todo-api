@@ -1,7 +1,7 @@
 import { Response } from "express";
 
 import { IRepositoryUser } from "../repositories/user";
-import { IHandlerUser, TypedRequest, Empty, WithUser } from ".";
+import { IHandlerUser, AppRequest, Empty, WithUser } from ".";
 
 export function newHandlerUser(repo: IRepositoryUser): IHandlerUser {
   return new HandlerUser(repo);
@@ -15,7 +15,7 @@ class HandlerUser implements IHandlerUser {
   }
 
   async register(
-    req: TypedRequest<Empty, WithUser>,
+    req: AppRequest<Empty, WithUser>,
     res: Response,
   ): Promise<Response> {
     const { username, password } = req.body;
@@ -42,7 +42,7 @@ class HandlerUser implements IHandlerUser {
   }
 
   async login(
-    req: TypedRequest<Empty, WithUser>,
+    req: AppRequest<Empty, WithUser>,
     res: Response,
   ): Promise<Response> {
     const { username, password } = req.body;

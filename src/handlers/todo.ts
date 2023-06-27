@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import { IRepositoryTodo } from "../repositories/todo";
-import { IHandlerTodo, TypedRequest, WithId, WithMsg } from ".";
+import { IHandlerTodo, AppRequest, WithId, WithMsg } from ".";
 
 export function newHandlerTodo(repoTodo: IRepositoryTodo): IHandlerTodo {
   return new HandlerTodo(repoTodo);
@@ -39,7 +39,7 @@ class HandlerTodo implements IHandlerTodo {
   }
 
   async getTodo(
-    req: TypedRequest<WithId, WithMsg>,
+    req: AppRequest<WithId, WithMsg>,
     res: Response,
   ): Promise<Response> {
     const id = Number(req.params.id);
@@ -70,7 +70,7 @@ class HandlerTodo implements IHandlerTodo {
   }
 
   async updateTodo(
-    req: TypedRequest<WithId, WithMsg>,
+    req: AppRequest<WithId, WithMsg>,
     res: Response,
   ): Promise<Response> {
     const id = Number(req.params.id);

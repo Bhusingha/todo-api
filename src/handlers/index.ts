@@ -1,7 +1,7 @@
 import { Express, Request, Response } from "express";
 
 // Custom Express `Request` (no Query)
-export interface TypedRequest<Params, Body> extends Express.Request {
+export interface AppRequest<Params, Body> extends Express.Request {
   params: Params;
   body: Body;
 }
@@ -24,15 +24,15 @@ export interface WithUser {
 export type HandlerFunc<Req> = (req: Req, res: Response) => Promise<Response>;
 
 export interface IHandlerTodo {
-  createTodo: HandlerFunc<TypedRequest<Empty, WithMsg>>;
-  getTodos: HandlerFunc<TypedRequest<Request, any>>;
-  getTodo: HandlerFunc<TypedRequest<WithId, any>>;
-  updateTodo: HandlerFunc<TypedRequest<WithId, WithMsg>>;
-  deleteTodo: HandlerFunc<TypedRequest<WithId, Empty>>;
+  createTodo: HandlerFunc<AppRequest<Empty, WithMsg>>;
+  getTodos: HandlerFunc<AppRequest<Request, any>>;
+  getTodo: HandlerFunc<AppRequest<WithId, any>>;
+  updateTodo: HandlerFunc<AppRequest<WithId, WithMsg>>;
+  deleteTodo: HandlerFunc<AppRequest<WithId, Empty>>;
   deleteTodos: HandlerFunc<Request>;
 }
 
 export interface IHandlerUser {
-  register: HandlerFunc<TypedRequest<Empty, WithUser>>;
-  login: HandlerFunc<TypedRequest<Empty, WithUser>>;
+  register: HandlerFunc<AppRequest<Empty, WithUser>>;
+  login: HandlerFunc<AppRequest<Empty, WithUser>>;
 }
