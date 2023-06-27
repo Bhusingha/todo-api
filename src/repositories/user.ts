@@ -2,8 +2,13 @@ import { PrismaClient } from "@prisma/client";
 
 import { IUser } from "../entities";
 
+interface ICreateUser {
+  username: string;
+  password: string;
+}
+
 export interface IRepositoryUser {
-  createUser(user: { username: string; password: string }): Promise<IUser>;
+  createUser(user: ICreateUser): Promise<IUser>;
   getUser(username: string): Promise<IUser>;
 }
 
@@ -18,10 +23,7 @@ class RepositoryUser implements IRepositoryUser {
     this.db = db;
   }
 
-  async createUser(user: {
-    username: string;
-    password: string;
-  }): Promise<IUser> {
+  async createUser(user: ICreateUser): Promise<IUser> {
     return await this.db.user
       .create({ data: user })
       .catch((err) =>
