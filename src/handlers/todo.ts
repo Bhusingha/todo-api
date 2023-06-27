@@ -1,17 +1,7 @@
 import { Request, Response } from "express";
+
 import { IRepositoryTodo } from "../repositories/todo";
-
-// TODO: move HandlerFund
-type HandlerFunc = (req: Request, res: Response) => Promise<Response>;
-
-export interface IHandlerTodo {
-  createTodo: HandlerFunc;
-  getTodos: HandlerFunc;
-  getTodo: HandlerFunc;
-  updateTodo: HandlerFunc;
-  deleteTodo: HandlerFunc;
-  deleteTodos: HandlerFunc;
-}
+import { IHandlerTodo, TypedRequest, WithId, WithMsg } from ".";
 
 export function newHandlerTodo(repoTodo: IRepositoryTodo): IHandlerTodo {
   return new HandlerTodo(repoTodo);
@@ -49,7 +39,7 @@ class HandlerTodo implements IHandlerTodo {
   }
 
   async getTodo(
-    req: Request<{ id: string }>,
+    req: TypedRequest<WithId, WithMsg>,
     res: Response,
   ): Promise<Response> {
     const id = Number(req.params.id);
@@ -79,7 +69,10 @@ class HandlerTodo implements IHandlerTodo {
       });
   }
 
-  async updateTodo(req: Request, res: Response): Promise<Response> {
+  async updateTodo(
+    req: TypedRequest<WithId, WithMsg>,
+    res: Response,
+  ): Promise<Response> {
     const id = Number(req.params.id);
     // isNaN checks if its arg is NaN
     if (isNaN(id)) {
@@ -103,7 +96,10 @@ class HandlerTodo implements IHandlerTodo {
       });
   }
 
-  async deleteTodo(req: Request, res: Response): Promise<Response> {
+  async deleteTodo(
+    req: Request<WithId, WithMsg>,
+    res: Response,
+  ): Promise<Response> {
     const id = Number(req.params.id);
     // isNaN checks if its arg is NaN
     if (isNaN(id)) {
@@ -121,7 +117,7 @@ class HandlerTodo implements IHandlerTodo {
       });
   }
 
-  async deleteTodos(req: Request, res: Response): Promise<Response> {
+  async deleteTodos(_, res: Response): Promise<Response> {
     return this.repo
       .deleteTodos()
       .then(() =>

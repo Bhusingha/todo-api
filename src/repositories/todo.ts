@@ -1,9 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
-interface ITodo {
-  id: number;
-  msg: string;
-}
+import { ITodo } from "../entities/todo";
 
 export interface IRepositoryTodo {
   createTodo(msg: string): Promise<ITodo>;

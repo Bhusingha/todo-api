@@ -1,13 +1,7 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+
 import { IRepositoryUser } from "../repositories/user";
-
-// TODO: move HandlerFund
-type HandlerFunc = (req: Request, res: Response) => Promise<Response>;
-
-export interface IHandlerUser {
-  register: HandlerFunc;
-  login: HandlerFunc;
-}
+import { IHandlerUser, TypedRequest, Empty, WithUser } from ".";
 
 export function newHandlerUser(repo: IRepositoryUser): IHandlerUser {
   return new HandlerUser(repo);
@@ -20,7 +14,10 @@ class HandlerUser implements IHandlerUser {
     this.repo = repo;
   }
 
-  async register(req: Request, res: Response): Promise<Response> {
+  async register(
+    req: TypedRequest<Empty, WithUser>,
+    res: Response,
+  ): Promise<Response> {
     const { username, password } = req.body;
     if (!username || !password) {
       return res
@@ -44,7 +41,10 @@ class HandlerUser implements IHandlerUser {
       });
   }
 
-  async login(req: Request, res: Response): Promise<Response> {
+  async login(
+    req: TypedRequest<Empty, WithUser>,
+    res: Response,
+  ): Promise<Response> {
     const { username, password } = req.body;
     if (!username || !password) {
       return res
@@ -56,7 +56,7 @@ class HandlerUser implements IHandlerUser {
     return this.repo
       .getUser(username)
       .then((user) => {
-        if (!user.password !== password) {
+        if (user.password !== password) {
           return res
             .status(401)
             .json({ error: "invalid username or password" })
