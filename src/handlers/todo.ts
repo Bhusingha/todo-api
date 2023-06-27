@@ -9,6 +9,7 @@ export function newHandlerTodo(repoTodo: IRepositoryTodo): IHandlerTodo {
 
 class HandlerTodo implements IHandlerTodo {
   private repo: IRepositoryTodo;
+
   constructor(repo: IRepositoryTodo) {
     this.repo = repo;
   }
