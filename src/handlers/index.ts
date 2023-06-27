@@ -1,10 +1,7 @@
-import { Express, Request, Response } from "express";
+import { Request, Response } from "express";
 
 // Custom Express `Request` (no Query)
-export interface AppRequest<Params, Body> extends Express.Request {
-  params: Params;
-  body: Body;
-}
+export interface AppRequest<Params, Body> extends Request<Params, any, Body> {}
 
 export interface Empty {}
 
