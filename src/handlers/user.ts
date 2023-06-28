@@ -1,6 +1,6 @@
 import { Response } from "express";
 
-import { IRepositoryUser } from "../repositories/user";
+import { IRepositoryUser } from "../repositories";
 import { IHandlerUser, AppRequest, Empty, WithUser } from ".";
 
 export function newHandlerUser(repo: IRepositoryUser): IHandlerUser {

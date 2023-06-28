@@ -1,15 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
+import { IRepositoryTodo } from ".";
 import { ITodo } from "../entities";
-
-export interface IRepositoryTodo {
-  createTodo(msg: string): Promise<ITodo>;
-  getTodoById(id: number): Promise<ITodo | null>;
-  getTodos(): Promise<ITodo[]>;
-  deleteTodoById(id: number): Promise<ITodo>;
-  deleteTodos(): Promise<void>;
-  updateTodo(id: number, msg: string): Promise<ITodo>;
-}
 
 export function newRepositoryTodo(db: PrismaClient): IRepositoryTodo {
   return new RepositoryTodo(db);

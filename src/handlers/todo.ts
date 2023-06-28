@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { IRepositoryTodo } from "../repositories/todo";
+import { IRepositoryTodo } from "../repositories";
 import { IHandlerTodo, AppRequest, WithId, WithMsg } from ".";
 
 export function newHandlerTodo(repoTodo: IRepositoryTodo): IHandlerTodo {
@@ -35,7 +35,7 @@ class HandlerTodo implements IHandlerTodo {
       .then((todos) => res.status(200).json(todos).end())
       .catch((err) => {
         console.error(`failed to create todo: ${err}`);
-        return res.status(500).json({ error: `failed to create todo` }).end();
+        return res.status(500).json({ error: `failed to get todos` }).end();
       });
   }
 
