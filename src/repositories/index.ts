@@ -1,17 +1,12 @@
-import { ITodo, IUser } from "../entities";
+import { ITodo, IUser, ICreateUser, ICreateTodo } from "../entities";
 
 export interface IRepositoryTodo {
-  createTodo(msg: string): Promise<ITodo>;
+  createTodo(arg: ICreateTodo): Promise<ITodo>;
   getTodoById(id: number): Promise<ITodo | null>;
   getTodos(): Promise<ITodo[]>;
   deleteTodoById(id: number): Promise<ITodo>;
   deleteTodos(): Promise<void>;
   updateTodo(id: number, msg: string): Promise<ITodo>;
-}
-
-export interface ICreateUser {
-  username: string;
-  password: string;
 }
 
 export interface IRepositoryUser {

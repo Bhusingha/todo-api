@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
-import { IUser } from "../entities";
-import { IRepositoryUser, ICreateUser } from ".";
+import { IUser, ICreateUser } from "../entities";
+import { IRepositoryUser } from ".";
 
 export function newRepositoryUser(db: PrismaClient): IRepositoryUser {
   return new RepositoryUser(db);

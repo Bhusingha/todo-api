@@ -8,3 +8,13 @@ export interface IUser {
   username: string;
   password: string;
 }
+
+export interface ICreateUser {
+  username: string;
+  password: string;
+}
+
+export interface ICreateTodo {
+  ownerId: number;
+  msg: string;
+}

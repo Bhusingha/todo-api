@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 import { IRepositoryTodo } from ".";
-import { ITodo } from "../entities";
+import { ICreateTodo, ITodo } from "../entities";
 
 export function newRepositoryTodo(db: PrismaClient): IRepositoryTodo {
   return new RepositoryTodo(db);
@@ -14,9 +14,9 @@ class RepositoryTodo implements IRepositoryTodo {
     this.db = db;
   }
 
-  async createTodo(msg: string): Promise<ITodo> {
+  async createTodo(arg: ICreateTodo): Promise<ITodo> {
     return this.db.todo.create({
-      data: { msg },
+      data: arg,
     });
   }
 
@@ -28,8 +28,25 @@ class RepositoryTodo implements IRepositoryTodo {
     });
   }
 
+  async getUserTodoById(where: {
+    ownerId: number;
+    id: number;
+  }): Promise<ITodo | null> {
+    return await this.db.todo.findFirst({
+      where,
+    });
+  }
+
   async getTodos(): Promise<ITodo[]> {
     return await this.db.todo.findMany();
+  }
+
+  async getUserTodos(ownerId: number): Promise<ITodo[]> {
+    return this.db.todo.findMany({
+      where: {
+        ownerId,
+      },
+    });
   }
 
   async deleteTodoById(id: number): Promise<ITodo> {
