@@ -1,5 +1,6 @@
 import { Response } from "express";
 
+import { hashPassword, compareHash } from "../utils/bcrypt";
 import { IRepositoryUser } from "../repositories";
 import { IHandlerUser, AppRequest, Empty, WithUser } from ".";
 
@@ -27,7 +28,7 @@ class HandlerUser implements IHandlerUser {
     }
 
     return this.repo
-      .createUser({ username, password })
+      .createUser({ username, password: hashPassword(password) })
       .then((user) =>
         res
           .status(201)
@@ -56,7 +57,7 @@ class HandlerUser implements IHandlerUser {
     return this.repo
       .getUser(username)
       .then((user) => {
-        if (user.password !== password) {
+        if (!compareHash(password, user.password)) {
           return res
             .status(401)
             .json({ error: "invalid username or password" })
