@@ -1,6 +1,6 @@
 import { Response } from "express";
 
-import { hashPassword, compareHash } from "../utils/bcrypt";
+import { hashPassword, compareHash } from "../auth/bcrypt";
 import { IRepositoryUser } from "../repositories";
 import { IHandlerUser, AppRequest, Empty, WithUser } from ".";
 
