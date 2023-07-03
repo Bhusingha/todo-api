@@ -62,16 +62,58 @@ class RepositoryTodo implements IRepositoryTodo {
     });
   }
 
+  async deleteUserTodoById(arg: {
+    id: number;
+    ownerId: number;
+  }): Promise<ITodo> {
+    const todo = await this.db.todo.findFirst({
+      where: { id: arg.id, ownerId: arg.id },
+    });
+
+    if (!todo) {
+      return Promise.reject(`no such todo: ${arg.id}`);
+    }
+
+    return await this.db.todo.delete({ where: { id: arg.id } });
+  }
+
   async deleteTodos(): Promise<void> {
     await this.db.todo.deleteMany();
   }
 
-  async updateTodo(id: number, msg: string): Promise<ITodo> {
+  async deleteUserTodos(ownerId: number): Promise<void> {
+    await this.db.todo.deleteMany({ where: { ownerId } });
+  }
+
+  async updateTodo(arg: { id: number; msg: string }): Promise<ITodo> {
     return await this.db.todo.update({
-      where: { id },
+      where: { id: arg.id },
       data: {
-        msg,
+        msg: arg.msg,
       },
+    });
+  }
+
+  async updateUserTodo(arg: {
+    id: number;
+    ownerId: number;
+    msg: string;
+  }): Promise<ITodo> {
+    const todo = await this.db.todo.findUnique({
+      where: { id: arg.id },
+    });
+
+    if (!todo) {
+      return Promise.reject(`no such todo ${arg.id}`);
+    }
+
+    if (todo.ownerId !== arg.ownerId) {
+      return Promise.reject(`bad ownerId: ${arg.ownerId}`);
+    }
+
+    return await this.db.todo.update({
+      where: { id: arg.id },
+      data: { msg: arg.msg },
     });
   }
 }

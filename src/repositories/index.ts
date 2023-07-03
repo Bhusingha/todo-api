@@ -3,11 +3,19 @@ import { ITodo, IUser, ICreateUser, ICreateTodo } from "../entities";
 export interface IRepositoryTodo {
   createTodo(arg: ICreateTodo): Promise<ITodo>;
   getTodoById(id: number): Promise<ITodo | null>;
+  getUserTodoById(arg: { id: number; ownerId: number }): Promise<ITodo | null>;
   getTodos(): Promise<ITodo[]>;
   getUserTodos(ownerId: number): Promise<ITodo[]>;
   deleteTodoById(id: number): Promise<ITodo>;
+  deleteUserTodoById(arg: { id: number; ownerId: number }): Promise<ITodo>;
   deleteTodos(): Promise<void>;
-  updateTodo(id: number, msg: string): Promise<ITodo>;
+  deleteUserTodos(ownerId: number): Promise<void>;
+  updateTodo(arg: { id: number; msg: string }): Promise<ITodo>;
+  updateUserTodo(arg: {
+    id: number;
+    ownerId: number;
+    msg: string;
+  }): Promise<ITodo>;
 }
 
 export interface IRepositoryUser {

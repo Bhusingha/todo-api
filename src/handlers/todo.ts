@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 
 import { IRepositoryTodo } from "../repositories";
-import { IHandlerTodo, AppRequest, Empty, WithId, WithMsg } from ".";
+import { IHandlerTodo, Empty, WithId, WithMsg } from ".";
 import { JwtAuthRequest } from "../auth/jwt";
 
 export function newHandlerTodo(repoTodo: IRepositoryTodo): IHandlerTodo {
@@ -49,7 +49,7 @@ class HandlerTodo implements IHandlerTodo {
   }
 
   async getTodo(
-    req: AppRequest<WithId, WithMsg>,
+    req: JwtAuthRequest<WithId, WithMsg>,
     res: Response,
   ): Promise<Response> {
     const id = Number(req.params.id);
@@ -61,7 +61,7 @@ class HandlerTodo implements IHandlerTodo {
     }
 
     return this.repo
-      .getTodoById(id)
+      .getUserTodoById({ id, ownerId: req.payload.id })
       .then((todo) => {
         if (!todo) {
           return res
@@ -80,7 +80,7 @@ class HandlerTodo implements IHandlerTodo {
   }
 
   async updateTodo(
-    req: AppRequest<WithId, WithMsg>,
+    req: JwtAuthRequest<WithId, WithMsg>,
     res: Response,
   ): Promise<Response> {
     const id = Number(req.params.id);
@@ -97,7 +97,7 @@ class HandlerTodo implements IHandlerTodo {
     }
 
     return this.repo
-      .updateTodo(id, msg)
+      .updateUserTodo({ id, ownerId: req.payload.id, msg })
       .then((updated) => res.status(201).json(updated).end())
       .catch((err) => {
         const errMsg = `failed to update todo ${id}: ${err}`;
@@ -107,7 +107,7 @@ class HandlerTodo implements IHandlerTodo {
   }
 
   async deleteTodo(
-    req: Request<WithId, WithMsg>,
+    req: JwtAuthRequest<WithId, WithMsg>,
     res: Response,
   ): Promise<Response> {
     const id = Number(req.params.id);
@@ -119,7 +119,7 @@ class HandlerTodo implements IHandlerTodo {
     }
 
     return this.repo
-      .deleteTodoById(id)
+      .deleteUserTodoById({ id, ownerId: req.payload.id })
       .then((deleted) => res.status(200).json(deleted).end())
       .catch((err) => {
         console.error(`failed to delete todo ${id}: ${err}`);
@@ -127,7 +127,10 @@ class HandlerTodo implements IHandlerTodo {
       });
   }
 
-  async deleteTodos(_, res: Response): Promise<Response> {
+  async deleteTodos(
+    req: JwtAuthRequest<Empty, Empty>,
+    res: Response,
+  ): Promise<Response> {
     return this.repo
       .deleteTodos()
       .then(() =>
