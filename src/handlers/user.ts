@@ -3,6 +3,7 @@ import { Response } from "express";
 import { hashPassword, compareHash } from "../auth/bcrypt";
 import { IRepositoryUser } from "../repositories";
 import { IHandlerUser, AppRequest, Empty, WithUser } from ".";
+import { Payload, newJwt } from "../auth/jwt";
 
 export function newHandlerUser(repo: IRepositoryUser): IHandlerUser {
   return new HandlerUser(repo);
@@ -64,9 +65,17 @@ class HandlerUser implements IHandlerUser {
             .end();
         }
 
+        const payload: Payload = { id: user.id, username: user.username };
+        const token = newJwt(payload);
+
         return res
           .status(200)
-          .json({ status: "logged in", user: { ...user, password: undefined } })
+          .json({
+            status: "logged in",
+            id: user.id,
+            username,
+            token,
+          })
           .end();
       })
       .catch((err) => {

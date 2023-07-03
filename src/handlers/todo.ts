@@ -15,13 +15,13 @@ class HandlerTodo implements IHandlerTodo {
   }
 
   async createTodo(req: Request, res: Response): Promise<Response> {
-    const { msg } = req.body;
+    const { msg, ownerId } = req.body;
     if (!msg) {
       return res.status(400).json({ error: "missing msg in json body" }).end();
     }
 
     return this.repo
-      .createTodo(msg)
+      .createTodo({ msg, ownerId })
       .then((todo) => res.status(201).json(todo).end())
       .catch((err) => {
         console.error(`failed to create todo: ${err}`);

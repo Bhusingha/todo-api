@@ -1,18 +1,62 @@
-import shinshin from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
+
+const secret = process.env.JWT_SECRET || "todo-secrets";
 
 export interface Payload {
-  userId: number;
+  id: number;
   username: string;
-  nums: number[];
 }
 
-export function newJwt(secret: string, data: Payload): string {
-  return shinshin.sign(data, secret, {
+export function newJwt(payload: Payload): string {
+  return jwt.sign(payload, secret, {
     algorithm: "HS512",
-    /** expressed in seconds or a string describing a time span [zeit/ms](https://github.com/zeit/ms.js).  Eg: 60, "2 days", "10h", "7d" */
     expiresIn: "12h",
-    issuer: "todo-api",
-    subject: "user-login",
-    audience: "user",
+    issuer: "academy",
+    subject: "registration",
+    audience: "students",
   });
+}
+
+export interface JwtAuthRequest extends Request {
+  token: string | jwt.JwtPayload;
+  payload: Payload;
+}
+
+export function jwtMiddleware(
+  req: JwtAuthRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  try {
+    if (!token) {
+      return res.status(401).json({ error: "missing JWT token" }).end();
+    }
+
+    const decoded = jwt.verify(token, secret);
+    const id = decoded["id"];
+    const username = decoded["username"];
+
+    if (!id) {
+      return res.status(401).json({ error: "missing payload `id`" }).end();
+    }
+    if (!username) {
+      return res
+        .status(401)
+        .json({ error: "missing payload `username`" })
+        .end();
+    }
+
+    req.token = decoded;
+    req.payload = {
+      id,
+      username,
+    };
+
+    return next();
+  } catch (err) {
+    console.error(`Auth failed for token ${token}: ${err}`);
+    return res.status(401).json({ error: "authentication failed" }).end();
+  }
 }

@@ -6,6 +6,7 @@ import { newRepositoryUser } from "./repositories/user";
 
 import { newHandlerTodo } from "./handlers/todo";
 import { newHandlerUser } from "./handlers/user";
+import { jwtMiddleware } from "./auth/jwt";
 
 async function main() {
   const db = new PrismaClient();
@@ -34,6 +35,7 @@ async function main() {
   userRouter.post("/login", handlerUser.login.bind(handlerUser));
 
   // To-do API
+  todoRouter.use(jwtMiddleware);
   todoRouter.post("/", handlerTodo.createTodo.bind(handlerTodo));
   todoRouter.get("/", handlerTodo.getTodos.bind(handlerTodo));
   todoRouter.get("/:id", handlerTodo.getTodo.bind(handlerTodo));
