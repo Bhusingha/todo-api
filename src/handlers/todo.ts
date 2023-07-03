@@ -49,7 +49,7 @@ class HandlerTodo implements IHandlerTodo {
   }
 
   async getTodo(
-    req: JwtAuthRequest<WithId, WithMsg>,
+    req: JwtAuthRequest<WithId, Empty>,
     res: Response,
   ): Promise<Response> {
     const id = Number(req.params.id);
