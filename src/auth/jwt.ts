@@ -18,13 +18,14 @@ export function newJwt(payload: Payload): string {
   });
 }
 
-export interface JwtAuthRequest extends Request {
+export interface JwtAuthRequest<Params, Body>
+  extends Request<Params, any, Body> {
   token: string | jwt.JwtPayload;
   payload: Payload;
 }
 
 export function jwtMiddleware(
-  req: JwtAuthRequest,
+  req: JwtAuthRequest<any, any>,
   res: Response,
   next: NextFunction,
 ) {

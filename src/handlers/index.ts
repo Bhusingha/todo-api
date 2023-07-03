@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { JwtAuthRequest } from "../auth/jwt";
 
 // Custom Express `Request` (no Query)
 export interface AppRequest<Params, Body> extends Request<Params, any, Body> {}
@@ -21,12 +22,12 @@ export interface WithUser {
 export type HandlerFunc<Req> = (req: Req, res: Response) => Promise<Response>;
 
 export interface IHandlerTodo {
-  createTodo: HandlerFunc<AppRequest<Empty, WithMsg>>;
-  getTodos: HandlerFunc<AppRequest<Request, any>>;
-  getTodo: HandlerFunc<AppRequest<WithId, any>>;
-  updateTodo: HandlerFunc<AppRequest<WithId, WithMsg>>;
-  deleteTodo: HandlerFunc<AppRequest<WithId, Empty>>;
-  deleteTodos: HandlerFunc<Request>;
+  createTodo: HandlerFunc<JwtAuthRequest<Empty, WithMsg>>;
+  getTodos: HandlerFunc<JwtAuthRequest<Request, any>>;
+  getTodo: HandlerFunc<JwtAuthRequest<WithId, any>>;
+  updateTodo: HandlerFunc<JwtAuthRequest<WithId, WithMsg>>;
+  deleteTodo: HandlerFunc<JwtAuthRequest<WithId, Empty>>;
+  deleteTodos: HandlerFunc<JwtAuthRequest<Empty, Empty>>;
 }
 
 export interface IHandlerUser {

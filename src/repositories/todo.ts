@@ -16,7 +16,14 @@ class RepositoryTodo implements IRepositoryTodo {
 
   async createTodo(arg: ICreateTodo): Promise<ITodo> {
     return this.db.todo.create({
-      data: arg,
+      data: {
+        msg: arg.msg,
+        owner: {
+          connect: {
+            id: arg.ownerId,
+          },
+        },
+      },
     });
   }
 

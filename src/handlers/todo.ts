@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 
 import { IRepositoryTodo } from "../repositories";
-import { IHandlerTodo, AppRequest, WithId, WithMsg } from ".";
+import { IHandlerTodo, AppRequest, Empty, WithId, WithMsg } from ".";
+import { JwtAuthRequest } from "../auth/jwt";
 
 export function newHandlerTodo(repoTodo: IRepositoryTodo): IHandlerTodo {
   return new HandlerTodo(repoTodo);
@@ -14,11 +15,16 @@ class HandlerTodo implements IHandlerTodo {
     this.repo = repo;
   }
 
-  async createTodo(req: Request, res: Response): Promise<Response> {
-    const { msg, ownerId } = req.body;
+  async createTodo(
+    req: JwtAuthRequest<Empty, WithMsg>,
+    res: Response,
+  ): Promise<Response> {
+    const { msg } = req.body;
     if (!msg) {
       return res.status(400).json({ error: "missing msg in json body" }).end();
     }
+
+    const ownerId = req.payload.id;
 
     return this.repo
       .createTodo({ msg, ownerId })
@@ -29,9 +35,12 @@ class HandlerTodo implements IHandlerTodo {
       });
   }
 
-  async getTodos(_, res: Response): Promise<Response> {
+  async getTodos(
+    req: JwtAuthRequest<Empty, Empty>,
+    res: Response,
+  ): Promise<Response> {
     return this.repo
-      .getTodos()
+      .getUserTodos(req.payload.id)
       .then((todos) => res.status(200).json(todos).end())
       .catch((err) => {
         console.error(`failed to create todo: ${err}`);
