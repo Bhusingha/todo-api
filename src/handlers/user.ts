@@ -29,12 +29,19 @@ class HandlerUser implements IHandlerUser {
 
     return this.repo
       .createUser({ username, password: hashPassword(password) })
-      .then((user) =>
-        res
+      .then((result) => {
+        if (!result.success) {
+          return res
+            .status(400)
+            .json({ error: `failed to create user: ${result.error}` });
+        }
+
+        const user = result.value;
+        return res
           .status(201)
           .json({ ...user, password: undefined })
-          .end(),
-      )
+          .end();
+      })
       .catch((err) => {
         const errMsg = `failed to create user ${username}`;
         console.error(`${errMsg}: ${err}`);
@@ -56,7 +63,16 @@ class HandlerUser implements IHandlerUser {
 
     return this.repo
       .getUser(username)
-      .then((user) => {
+      .then((result) => {
+        if (!result.success) {
+          return res.status(500).json({ error: result.error });
+        }
+
+        const user = result.value;
+        if (!user) {
+          return res.status(404).json({ error: `user ${username} not found` });
+        }
+
         if (!compareHash(password, user.password)) {
           return res
             .status(401)

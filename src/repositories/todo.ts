@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
-import { IRepositoryTodo } from ".";
+import { IRepositoryTodo, Result } from ".";
+import { isError, ERR_DUPLICATE_PKEY, ERR_WHERE_NOT_FOUND } from "./error";
 import { ICreateTodo, ITodo } from "../entities";
 
 export function newRepositoryTodo(db: PrismaClient): IRepositoryTodo {
@@ -14,27 +15,59 @@ class RepositoryTodo implements IRepositoryTodo {
     this.db = db;
   }
 
-  async createTodo(arg: ICreateTodo): Promise<ITodo> {
-    return this.db.todo.create({
-      data: arg,
-    });
+  async createTodo(todo: ICreateTodo): Promise<Result<ITodo>> {
+    try {
+      const created = await this.db.todo.create({
+        data: todo,
+      });
+      return Promise.resolve({ success: true, value: created });
+    } catch (err) {
+      if (isError(err, ERR_DUPLICATE_PKEY)) {
+        return Promise.resolve({
+          success: false,
+          error: Error(err),
+        });
+      }
+
+      return Promise.reject(err);
+    }
   }
 
-  async getTodoById(id: number): Promise<ITodo | null> {
-    return await this.db.todo.findUnique({
-      where: {
-        id,
-      },
-    });
+  async getTodoById(id: number): Promise<Result<ITodo | null>> {
+    try {
+      const todo = await this.db.todo.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      return Promise.resolve({ success: true, value: todo });
+    } catch (err) {
+      if (isError(err, ERR_WHERE_NOT_FOUND)) {
+        return Promise.resolve({ success: false, error: err });
+      }
+
+      return Promise.reject(err);
+    }
   }
 
   async getUserTodoById(where: {
     ownerId: number;
     id: number;
-  }): Promise<ITodo | null> {
-    return await this.db.todo.findFirst({
-      where,
-    });
+  }): Promise<Result<ITodo | null>> {
+    try {
+      const user = await this.db.todo.findFirst({
+        where,
+      });
+
+      return Promise.resolve({ success: true, value: user });
+    } catch (err) {
+      if (isError(err, ERR_WHERE_NOT_FOUND)) {
+        return Promise.resolve({ success: false, error: err });
+      }
+
+      return Promise.reject(err);
+    }
   }
 
   async getTodos(): Promise<ITodo[]> {
