@@ -1,19 +1,24 @@
 import { Response } from "express";
 
 import { hashPassword, compareHash } from "../auth/bcrypt";
-import { IRepositoryUser } from "../repositories";
+import { IRepositoryBlacklist, IRepositoryUser } from "../repositories";
 import { IHandlerUser, AppRequest, Empty, WithUser } from ".";
-import { Payload, newJwt } from "../auth/jwt";
+import { JwtAuthRequest, Payload, newJwt } from "../auth/jwt";
 
-export function newHandlerUser(repo: IRepositoryUser): IHandlerUser {
-  return new HandlerUser(repo);
+export function newHandlerUser(
+  repo: IRepositoryUser,
+  repoBlacklist: IRepositoryBlacklist,
+): IHandlerUser {
+  return new HandlerUser(repo, repoBlacklist);
 }
 
 class HandlerUser implements IHandlerUser {
   private repo: IRepositoryUser;
+  private repoBlacklist: IRepositoryBlacklist;
 
-  constructor(repo: IRepositoryUser) {
+  constructor(repo: IRepositoryUser, repoBlacklist: IRepositoryBlacklist) {
     this.repo = repo;
+    this.repoBlacklist = repoBlacklist;
   }
 
   async register(
@@ -81,6 +86,24 @@ class HandlerUser implements IHandlerUser {
       .catch((err) => {
         console.error(`failed to get user: ${err}`);
         return res.status(500).end();
+      });
+  }
+
+  async logout(
+    req: JwtAuthRequest<Empty, Empty>,
+    res: Response,
+  ): Promise<Response> {
+    return await this.repoBlacklist
+      .addToBlacklist(req.token)
+      .then(() =>
+        res.status(200).json({ status: `logged out`, token: req.token }).end(),
+      )
+      .catch((err) => {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ error: `could not log out with token ${req.token}` })
+          .end();
       });
   }
 }

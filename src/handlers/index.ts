@@ -33,4 +33,5 @@ export interface IHandlerTodo {
 export interface IHandlerUser {
   register: HandlerFunc<AppRequest<Empty, WithUser>>;
   login: HandlerFunc<AppRequest<Empty, WithUser>>;
+  logout: HandlerFunc<AppRequest<Empty, Empty>>;
 }

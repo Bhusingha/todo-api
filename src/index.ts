@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { createClient } from "redis";
 import express from "express";
 
 import { newRepositoryTodo } from "./repositories/todo";
@@ -6,15 +7,28 @@ import { newRepositoryUser } from "./repositories/user";
 
 import { newHandlerTodo } from "./handlers/todo";
 import { newHandlerUser } from "./handlers/user";
-import { jwtMiddleware } from "./auth/jwt";
+import { HandlerMiddleware } from "./auth/jwt";
+import { newRepositoryBlacklist } from "./repositories/blacklist";
 
 async function main() {
   const db = new PrismaClient();
+  const redis = createClient();
+
+  try {
+    redis.connect();
+    db.$connect();
+  } catch (err) {
+    console.error(err);
+    return;
+  }
 
   const repoUser = newRepositoryUser(db);
-  const handlerUser = newHandlerUser(repoUser);
+  const repoBlacklist = newRepositoryBlacklist(redis);
+  const handlerUser = newHandlerUser(repoUser, repoBlacklist);
   const repoTodo = newRepositoryTodo(db);
   const handlerTodo = newHandlerTodo(repoTodo);
+
+  const handlerMiddleware = new HandlerMiddleware(repoBlacklist);
 
   const port = process.env.PORT || 8000;
   const server = express();
@@ -33,9 +47,14 @@ async function main() {
   // User API
   userRouter.post("/register", handlerUser.register.bind(handlerUser));
   userRouter.post("/login", handlerUser.login.bind(handlerUser));
+  userRouter.get(
+    "/logout",
+    handlerMiddleware.jwtMiddleware.bind(handlerMiddleware),
+    handlerUser.logout.bind(handlerUser),
+  );
 
   // To-do API
-  todoRouter.use(jwtMiddleware);
+  todoRouter.use(handlerMiddleware.jwtMiddleware.bind(handlerMiddleware));
   todoRouter.post("/", handlerTodo.createTodo.bind(handlerTodo));
   todoRouter.get("/", handlerTodo.getTodos.bind(handlerTodo));
   todoRouter.get("/:id", handlerTodo.getTodo.bind(handlerTodo));
