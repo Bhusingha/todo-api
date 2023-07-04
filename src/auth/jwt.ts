@@ -12,7 +12,7 @@ export interface Payload {
 export function newJwt(payload: Payload): string {
   return jwt.sign(payload, secret, {
     algorithm: "HS512",
-    expiresIn: "12h",
+    expiresIn: "30s",
     issuer: "academy",
     subject: "registration",
     audience: "students",

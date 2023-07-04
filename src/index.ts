@@ -9,6 +9,7 @@ import { newHandlerTodo } from "./handlers/todo";
 import { newHandlerUser } from "./handlers/user";
 import { HandlerMiddleware } from "./auth/jwt";
 import { newRepositoryBlacklist } from "./repositories/blacklist";
+import { expirer } from "./expirer";
 
 async function main() {
   const db = new PrismaClient();
@@ -21,6 +22,8 @@ async function main() {
     console.error(err);
     return;
   }
+
+  expirer(redis);
 
   const repoUser = newRepositoryUser(db);
   const repoBlacklist = newRepositoryBlacklist(redis);
